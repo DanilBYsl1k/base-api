@@ -10,14 +10,10 @@ Route::prefix('auth')->name('auth.')->group(function () {
     Route::put('reset-password', [AuthController::class, 'resetPassword'])->name('resetPassword');
 });
 
-
 Route::group(["middleware" => ['auth:api']], function () {
     Route::get('profile', [AuthController::class, 'profile'])->name('profile');
     Route::get('logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('refresh-token', [AuthController::class, 'refresh'])->name('refresh');
+    Route::post('');
 });
-
-//Route::fallback(function () {
-//    return response()->json(['message' => 'url not found'], 404);
-//});
 
