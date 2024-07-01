@@ -2,46 +2,81 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-
-use App\Http\Requests\Auth\LoginRequest;
-use App\Http\Requests\Auth\RegisterRequest;
+use App\Http\Requests\Auth\AuthRequest;
+use App\Http\Requests\Auth\RestorePasswordRequest;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\JsonResponse;
 
 class AuthController extends BaseController
 {
-    //Login api - post
-    public function login(LoginRequest $request)
-    {
 
+    public function login(): JsonResponse
+    {
+        try {
+            $credentials = request(['email', 'password']);
+            $token = auth()->attempt($credentials);
+
+            if (!$token) {
+                return $this->sendError('Unauthorized',['error' => 'Unauthorized'], 401);
+            }
+            $data = $credentials;
+            $data['token'] = $token;
+
+            return $this->respondWithToken($token);
+        } catch (\Exception $exception) {
+            return $this->sendError($exception->getMessage(), $exception->getCode());
+        }
     }
 
-    //Register api - post
-    public function register(RegisterRequest $request)
+    public function register(AuthRequest $request): JsonResponse
     {
         $data = $request->validated();
 
+        $user = new User;
+        $user->name = $data['email'];
+        $user->email = $data['email'];
+        $user->password = bcrypt($data['password']);
+        $user->save();
+
+        return $this->sendResponse($data, 'user created successfully', 201);
     }
 
-    public function logout(Request $request)
+    public function profile()
     {
-
+        $user = Auth::user();
+        return $this->sendResponse($user);
     }
 
-    //Profile api - get
-    public function profile(Request $request)
+    public function logout(): JsonResponse
     {
-
+        Auth::logout();
+        return $this->sendResponse(null, 'Successfully logged out', 200);
     }
 
-    //Refresh api - get
-    public function refreshToken(Request $request)
+    public function refresh(): JsonResponse
     {
-
+        $token = auth()->refresh();
+        return $this->respondWithToken($token);
     }
 
-    //Profile api - get
-    public function resetPassword(Request $request)
+    public function resetPassword(RestorePasswordRequest $request): JsonResponse
     {
+        $data = $request->validated();
 
+        $password = bcrypt($data['password']);
+
+        User::where('email', $data['email'])->update(['password' => $password]);
+
+        return $this->sendResponse(true, 'Password reset successfully', 200);
+    }
+
+    protected function respondWithToken($token): JsonResponse
+    {
+        return response()->json([
+            'access_token' => $token,
+            'token_type' => 'bearer',
+            'expires_in' => auth()->factory()->getTTL() * 60
+        ]);
     }
 }
