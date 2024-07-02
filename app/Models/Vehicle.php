@@ -9,4 +9,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Vehicle extends Model
 {
     use HasFactory, SoftDeletes;
+
+    protected $with = ['vehicle_img'];
+
+    public function vehicle_img()
+    {
+        return $this->hasMany(Vehicle_img::class, 'vehicle_id', 'id');
+    }
 }

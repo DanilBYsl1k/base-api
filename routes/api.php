@@ -12,7 +12,7 @@ Route::prefix('auth')->name('auth.')->group(function () {
 });
 
 Route::get('vehicles', [VehicleController::class, 'index'])->name('vehicles.index');
-Route::get('vehicles/{id}', [VehicleController::class, 'show'])->name('vehicles.index');
+Route::get('vehicle/{id}', [VehicleController::class, 'show'])->name('vehicle.show');
 
 Route::group(["middleware" => ['auth:api']], function () {
     Route::get('profile', [AuthController::class, 'profile'])->name('profile');
@@ -20,6 +20,7 @@ Route::group(["middleware" => ['auth:api']], function () {
     Route::get('refresh-token', [AuthController::class, 'refresh'])->name('refresh');
 
     Route::group(["prefix" => "vehicles"], function () {
+
         Route::post('create', [VehicleController::class, 'create'])->name('create');
     })->name('vehicles.');
 });

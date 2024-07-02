@@ -14,15 +14,5 @@ class ImageController extends BaseController
         $data = $request->validated();
 
         $path = Storage::disk('public')->put('/images', $data['image']);
-
-//        if ($request->hasFile('image')) {
-//            $file = $data['image'];
-//            $file_name = $file->getClientOriginalName();
-//            $file->move(public_path('images'), $file_name);
-//
-//            return $this->sendResponse();
-//        }
-
-//        return $this->sendResponse();
     }
 }
